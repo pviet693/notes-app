@@ -213,10 +213,14 @@ body {
     height: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
     margin-bottom: 10px;
 }
 
 .notes-container ul.note-list .note-item .note-item--description:hover {
+    display: unset;
     overflow-y: scroll;
 }
 
