@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <script src="./script.js" defer></script>
+</head>
+
+<body>
+    <div class="pop-up-container">
+        <div class="pop-up-content">
+            <header class="pop-up-content--header">
+                <p>Add a new Note</p>
+                <i class="uil uil-times"></i>
+            </header>
+            <div class="pop-up-content--body">
+                <form action="">
+                    <div class="row-input">
+                        <label for="title">Title</label>
+                        <input type="text" name="title" id="title" value="">
+                    </div>
+                    <div class="row-input">
+                        <label for="description">Description</label>
+                        <textarea name="description" id="description" rows="4"></textarea>
+                    </div>
+                    <button type="submit">Add Note</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="notes-container">
+        <ul class="note-list">
+            <li class="create-new-note">
+                <i class="uil uil-plus"></i>
+                <p>Add new note</p>
+            </li>
+            <li class="note-item">
+                <div class="note-item--title">test</div>
+                <p class="note-item--description">
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                </p>
+                <div class="note-item--footer">
+                   <p class="note-item--created-time">November 8, 2022</p>
+                   <button>
+                        <i class="uil uil-ellipsis-h"></i>
+                   </button>
+                </div>
+                <div class="note-item--menu">
+                    <div class="menu-item">
+                        <i class="uil uil-pen"></i>
+                        <p>Edit</p>
+                    </div>
+                    <div class="menu-item">
+                        <i class="uil uil-trash-alt"></i>
+                        <p>Delete</p>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
