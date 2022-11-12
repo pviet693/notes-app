@@ -5,15 +5,21 @@ const $ = document.querySelector.bind(document);
 const noteList = $(".note-list");
 const createNewNoteIcon = $(".create-new-note i");
 const popupContainer = $(".pop-up-container");
+const popupContent = $(".pop-up-container .pop-up-content");
+const popupHeaderTitle = popupContent.querySelector("header p");
+const popupButton = popupContent.querySelector("form button");
 const closePopupIcon = $(".pop-up-container header i");
 const popupForm = $(".pop-up-container form");
 
-function onCreateNewNoteClickHandler() {
+function onOpenPopupClickHandler() {
     popupContainer.classList.add("show");
+    popupHeaderTitle.textContent = "Add a new Note";
+    popupButton.textContent = "Add Note"
 }
 
 function onClosePopupClickHandler() {
     popupContainer.classList.remove("show");
+    popupForm.reset();
 }
 
 function onPopupContainerClickHandler(event) {
@@ -22,9 +28,16 @@ function onPopupContainerClickHandler(event) {
     }
 }
 
-function onEditClickHandler(id, title, description) {
-    console.log("id", id);
-    // TODO
+function onEditClickHandler(id, title, description, nodeEle) {
+    nodeEle.parentElement.classList.remove("show");
+    popupContainer.classList.add("show");
+    popupHeaderTitle.textContent = "Update a Note";
+    popupButton.textContent = "Update Note";
+
+    // init form value
+    popupForm.elements["id"].value = id;
+    popupForm.elements["title"].value = title;
+    popupForm.elements["description"].value = description;
 }
 
 function onDeleteClickHandler(id) {
@@ -37,14 +50,14 @@ function openMenuClickHandler(nodeEle) {
 
     document.addEventListener("click", (event) => {
         if (event.target.className !== "uil uil-ellipsis-h" && !event.target.closest(".note-item--menu")) {
-            nodeEle.parentElement.nextElementSibling.classList.remove("show");
+            if (nodeEle.parentElement.nextElementSibling) {
+                nodeEle.parentElement.nextElementSibling.classList.remove("show");
+            }
         }
     });
 }
 
-function generateNewNote(title, description, time) {
-    const id = generateUniqueId();
-
+function generateNewNote(id, title, description, time) {
     const noteItemEle = document.createElement("li");
     noteItemEle.classList.add("note-item");
     noteItemEle.setAttribute("id", id);
@@ -60,7 +73,7 @@ function generateNewNote(title, description, time) {
             </button>
         </div>
         <div class="note-item--menu">
-            <div class="menu-item" onclick="onEditClickHandler('${id}', '${title}', '${description}')">
+            <div class="menu-item" onclick="onEditClickHandler('${id}', '${title}', '${description}', this)">
                 <i class="uil uil-pen"></i>
                 <p>Edit</p>
             </div>
@@ -74,22 +87,54 @@ function generateNewNote(title, description, time) {
     noteList.appendChild(noteItemEle);
 }
 
+function updateNote(id, title, description, time) {
+    const noteItemEle = $(`#${id}`);
+    noteItemEle.innerHTML = `
+        <div class="note-item--title">${title}</div>
+        <p class="note-item--description">
+            ${description}
+        </p>
+        <div class="note-item--footer">
+            <p class="note-item--created-time">${time}</p>
+            <button onclick="openMenuClickHandler(this)">
+                <i class="uil uil-ellipsis-h"></i>
+            </button>
+        </div>
+        <div class="note-item--menu">
+            <div class="menu-item" onclick="onEditClickHandler('${id}', '${title}', '${description}', this)">
+                <i class="uil uil-pen"></i>
+                <p>Edit</p>
+            </div>
+            <div class="menu-item" onclick="onDeleteClickHandler('${id}')">
+                <i class="uil uil-trash-alt"></i>
+                <p>Delete</p>
+            </div>
+        </div>
+    `;
+}
+
 function onSubmitHandler(event) {
     event.preventDefault();
 
     const formData = new FormData(event.target);
+    const id = formData.get("id");
     const title = formData.get("title");
     const description = formData.get("description");
-    const date = new Date();
     const time = formatCurrentDate();
 
-    if (title) {
+    if (!id && title) {
         onClosePopupClickHandler();
-        generateNewNote(title, description, time);
+        const itemId = generateUniqueId();
+        generateNewNote(itemId, title, description, time);
+    }
+
+    if (id && title) {
+        onClosePopupClickHandler();
+        updateNote(id, title, description, time);
     }
 }
 
-createNewNoteIcon.addEventListener("click", onCreateNewNoteClickHandler);
+createNewNoteIcon.addEventListener("click", onOpenPopupClickHandler);
 popupContainer.addEventListener("click", onPopupContainerClickHandler);
 closePopupIcon.addEventListener("click", onClosePopupClickHandler);
 popupForm.addEventListener("submit", onSubmitHandler);

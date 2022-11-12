@@ -192,6 +192,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    width: calc(100% - 100px);
     list-style-type: none;
 }
 
@@ -200,7 +201,7 @@ body {
     border-radius: 5px;
     height: 250px;
     background-color: #fff;
-    flex: 0 0 20%;
+    flex: 0 0 calc(20% - 16px);
 }
 
 .notes-container ul.note-list .create-new-note {
