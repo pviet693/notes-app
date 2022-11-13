@@ -1,4 +1,7 @@
 "use strict";
+import { generateUniqueId, formatCurrentDate } from "./utils.js";
+import { showSuccessAlert } from "./alert.js";
+import DBService from "./db.js";
 
 const $ = document.querySelector.bind(document);
 
@@ -43,13 +46,24 @@ function onEditClickHandler(id, title, description, nodeEle) {
 function onDeleteClickHandler(id) {
     const itemDeleted = $(`#${id}`);
     itemDeleted.remove();
+
+    const dbService = new DBService();
+    dbService.deleteNoteInDB(id).then((message) => {
+        // alert(message);
+        showSuccessAlert(message);
+    }).catch((error) => {
+        console.error(error.message || error);    
+    });;
 }
 
-function openMenuClickHandler(nodeEle) {
+function openMenuClickHandler(id, nodeEle) {
     nodeEle.parentElement.nextElementSibling.classList.add("show");
 
     document.addEventListener("click", (event) => {
-        if (event.target.className !== "uil uil-ellipsis-h" && !event.target.closest(".note-item--menu")) {
+        if (
+            !event.target.closest(`#${id}`) 
+            || (!event.target.closest(".note-item--menu") && event.target.tagName !== "I")
+        ) {
             if (nodeEle.parentElement.nextElementSibling) {
                 nodeEle.parentElement.nextElementSibling.classList.remove("show");
             }
@@ -68,21 +82,28 @@ function generateNewNote(id, title, description, time) {
         </p>
         <div class="note-item--footer">
             <p class="note-item--created-time">${time}</p>
-            <button onclick="openMenuClickHandler(this)">
-                <i class="uil uil-ellipsis-h"></i>
+            <button>
+                <i class="fa-solid fa-ellipsis"></i>
             </button>
         </div>
-        <div class="note-item--menu">
-            <div class="menu-item" onclick="onEditClickHandler('${id}', '${title}', '${description}', this)">
-                <i class="uil uil-pen"></i>
+        <div class="note-item--menu" id=${id}>
+            <div class="menu-item">
+                <i class="fa-solid fa-pen"></i>
                 <p>Edit</p>
             </div>
-            <div class="menu-item" onclick="onDeleteClickHandler('${id}')">
-                <i class="uil uil-trash-alt"></i>
+            <div class="menu-item">
+                <i class="fa-solid fa-trash"></i>
                 <p>Delete</p>
             </div>
         </div>
     `;
+
+    const openMenuBtn = noteItemEle.querySelector(".note-item--footer button");
+    const updateNoteBtn = noteItemEle.querySelector(".note-item--menu .menu-item:nth-child(1)");
+    const deleteNoteBtn = noteItemEle.querySelector(".note-item--menu .menu-item:nth-child(2)");
+    openMenuBtn.addEventListener("click", () => openMenuClickHandler(id, openMenuBtn));
+    updateNoteBtn.addEventListener("click", () => onEditClickHandler(id, title, description, updateNoteBtn));
+    deleteNoteBtn.addEventListener("click", () => onDeleteClickHandler(id));
 
     noteList.appendChild(noteItemEle);
 }
@@ -96,21 +117,28 @@ function updateNote(id, title, description, time) {
         </p>
         <div class="note-item--footer">
             <p class="note-item--created-time">${time}</p>
-            <button onclick="openMenuClickHandler(this)">
-                <i class="uil uil-ellipsis-h"></i>
+            <button>
+                <i class="fa-solid fa-ellipsis"></i>
             </button>
         </div>
-        <div class="note-item--menu">
-            <div class="menu-item" onclick="onEditClickHandler('${id}', '${title}', '${description}', this)">
-                <i class="uil uil-pen"></i>
+        <div class="note-item--menu" id=${id}>
+            <div class="menu-item">
+                <i class="fa-light fa-pencil"></i>
                 <p>Edit</p>
             </div>
-            <div class="menu-item" onclick="onDeleteClickHandler('${id}')">
-                <i class="uil uil-trash-alt"></i>
+            <div class="menu-item">
+                <i class="fa-regular fa-trash"></i>
                 <p>Delete</p>
             </div>
         </div>
     `;
+
+    const openMenuBtn = noteItemEle.querySelector(".note-item--footer button");
+    const updateNoteBtn = noteItemEle.querySelector(".note-item--menu .menu-item:nth-child(1)");
+    const deleteNoteBtn = noteItemEle.querySelector(".note-item--menu .menu-item:nth-child(2)");
+    openMenuBtn.addEventListener("click", () => openMenuClickHandler(id, openMenuBtn));
+    updateNoteBtn.addEventListener("click", () => onEditClickHandler(id, title, description, updateNoteBtn));
+    deleteNoteBtn.addEventListener("click", () => onDeleteClickHandler(id));
 }
 
 function onSubmitHandler(event) {
@@ -126,15 +154,58 @@ function onSubmitHandler(event) {
         onClosePopupClickHandler();
         const itemId = generateUniqueId();
         generateNewNote(itemId, title, description, time);
+
+        const dbService = new DBService();
+        dbService.addNoteToDB({
+            id: itemId,
+            title,
+            description,
+            time
+        }).then((message) => {
+            showSuccessAlert(message);
+            // alert(message);
+        }).catch((error) => {
+            console.error(error.message || error);    
+        });;
     }
 
     if (id && title) {
         onClosePopupClickHandler();
         updateNote(id, title, description, time);
+
+        const dbService = new DBService();
+        dbService.updateNoteInDB({
+            id,
+            title,
+            description,
+            time
+        }).then((message) => {
+            // alert(message);
+            showSuccessAlert(message);
+        }).catch((error) => {
+            console.error(error.message || error);    
+        });
     }
+}
+
+async function initData() {
+    const dbService = new DBService();
+    dbService.getNoteDataList().then((result) => {
+        result.forEach((item) => {
+            generateNewNote(
+                item.id,
+                item.title,
+                item.description,
+                item.time
+            );
+        });
+    }).catch((error) => {
+        console.error(error.message || error);
+    });
 }
 
 createNewNoteIcon.addEventListener("click", onOpenPopupClickHandler);
 popupContainer.addEventListener("click", onPopupContainerClickHandler);
 closePopupIcon.addEventListener("click", onClosePopupClickHandler);
 popupForm.addEventListener("submit", onSubmitHandler);
+document.addEventListener("DOMContentLoaded", initData.bind(this));
